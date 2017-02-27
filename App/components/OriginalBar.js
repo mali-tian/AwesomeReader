@@ -11,6 +11,12 @@ var {
   Image,
 } = ReactNative;
 
+import ScrollTest from "./ScrollBook"
+import CurrentMonth from "./CurrentMonth"
+
+var Dimensions = require('Dimensions');
+var {width, height} = Dimensions.get('window');
+
 export default class OriginalBar extends React.Component {
   static title = '<OriginalBarIOS>';
   static description = 'OriginalBar-based navigation.';
@@ -25,10 +31,9 @@ export default class OriginalBar extends React.Component {
   _renderContent = (color: string, pageText: string) => {
     return (
       <View style={[styles.tabContent, {backgroundColor: color}]}>
-        <View style={[styles.topSearch, {backgroundColor: color}]}>
-        </View>
+        <View style={[styles.topSearch, {backgroundColor: color}]}/>
         <View style={styles.topLiterature}>
-          <View style={{flex: 1}}>
+          <View style={{flex: 1, marginLeft: 10}}>
               <Image source={require('../images/top-literature/topTheme.png')} style={{width: 200, height: 70}} />
           </View>
           <View style={{ width: 150, padding: 30}}>
@@ -36,7 +41,12 @@ export default class OriginalBar extends React.Component {
               <Text style={[styles.tabContent, {color: 'red',fontSize: 20}]}>免费阅读</Text>
           </View>
         </View>
-        <Text style={[styles.tabText]}>{this.state.selectedTab}</Text>
+        <View>
+          <ScrollTest/>
+        </View>
+        <View style={{height: 300}}>
+          <CurrentMonth />
+        </View>
       </View>
     );
   };
@@ -68,7 +78,7 @@ var styles = StyleSheet.create({
     alignItems: "center",
     flexDirection:'row',
     height: 100,
-    width: 370,
+    width: width,
   },
   tabContent: {
     flex: 1,
@@ -80,12 +90,3 @@ var styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
-var picStyles = StyleSheet.create({
-  topTheme: {
-    height: 90,
-    padding: 5,
-    width: 450,
-    alignItems: "center",
-  }
-})
