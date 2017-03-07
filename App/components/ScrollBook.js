@@ -8,39 +8,43 @@ import {
     Image
 } from 'react-native';
 
-// 引入Dimensions库
+import Book from "./Book";
+
 var Dimensions = require('Dimensions');
 var {width, height} = Dimensions.get('window');
+var bookUrls = ['https://api.douban.com/v2/book/1220560', 'https://api.douban.com/v2/book/1220561',
+                'https://api.douban.com/v2/book/1220562','https://api.douban.com/v2/book/1220563',
+                'https://api.douban.com/v2/book/1220564', 'https://api.douban.com/v2/book/1220565',
+                'https://api.douban.com/v2/book/1220566', 'https://api.douban.com/v2/book/1220567',
+                'https://api.douban.com/v2/book/1220568', 'https://api.douban.com/v2/book/1220569'];
 
-// 获取json中的数据
-var imageData = require('../data/ImageData.json');
-
-// 视图
 var CustomScrollView = React.createClass({
-    // 先初始化页码,确定初始化后显示哪个页面
+
     getInitialState(){
         return{
-            // 初始化当前页码
-            currentPage:0
+            currentPage:0,
+            bookList:[],
         }
+    },
+
+    componentWillMount(){
+      for(var i = 0; i<bookUrls.length; i++){
+        this.fetchData(bookUrls[i]);
+      }
     },
 
     render(){
         return(
             <View style={styles.container}>
-                {/* 实例化ScrollView */}
                 <ScrollView style={styles.scrollViewStyle}
                             horizontal={true}   // 水平方向
                             showsHorizontalScrollIndicator={false}  // 隐藏水平指示器
                             showsVerticalScrollIndicator={false}    // 隐藏垂直指示器
                             pagingEnabled={true}    // 开启分页功能
-                            onMomentumScrollEnd={this.onAnimationEnd}   // 当一帧滚动完毕的时候调用
-                >
-                    {/* 实例化内部子视图 */}
-                    {this.renderItem()}
+                            onMomentumScrollEnd={this.onAnimationEnd} // 当一帧滚动完毕的时候调用
+                            automaticallyAdjustContentInsets={false}>
+                            {this.renderItem()}
                 </ScrollView>
-
-                {/* 实例化分页指示器 */}
                 <View style={styles.pagingIndicatorStyle}>
                     {this.renderPagingIndicator()}
                 </View>
@@ -48,93 +52,65 @@ var CustomScrollView = React.createClass({
         );
     },
 
-    // 监听滚动
+    fetchData(url) {
+      var request = new XMLHttpRequest();
+      request.onreadystatechange = (e) => {
+        if (request.readyState !== 4) {
+          return;
+        }
+        if (request.status === 200) {
+          var book = this.state.bookList;
+          book.push(JSON.parse(request.responseText));
+          this.setState(
+            {bookList: book}
+          );
+        } else {
+          console.warn('error');
+        }
+      };
+      request.open('GET', url);
+      request.send();
+    },
+
     onAnimationEnd(e){
-        // 求出水平方向上的偏移量
         var offSetX = e.nativeEvent.contentOffset.x;
-        // 计算当前页码
         var currentPage = offSetX / width;
-        // 重新绘制UI
         this.setState({
             currentPage:currentPage
         });
     },
 
-    // 分页指示器
-    renderPagingIndicator() {
-        var itemAry = [], autoColor;
-
-        // 获取json中图片
-        var  imgAry = imageData.data;
-
-        // 根据json数据实例化视图
-        for (var i = 0; i<imgAry.length; i++) {
-            // 取出单个对象
+    renderItem() {
+        var itemAry = [];
+        var imgAry = this.state.bookList;
+        console.log("this is the book list: ", imgAry);
+        for (var i = 0; i<imgAry.length-2; i=i+2) {
             var item = imgAry[i];
-
-            // 跟随当前页改变对应 点 的颜色
-            autoColor = (this.state.currentPage === i) ? {color:'gray'} : {color:'gainsboro'}
-
-            // 将子视图放进 itemAry
             itemAry.push(
-                // 实例化视图
-                <Text key={i} style={[{fontSize:25}, autoColor]}>&bull;</Text>
+              <View key={i} style={styles.topLiterature}>
+                <Book bookName={imgAry[i].title} author={imgAry[i].author}  pic={imgAry[i].image}/>
+                <Book bookName={imgAry[i+1].title} author={imgAry[i+1].author} pic={imgAry[i+1].image} />
+                <Book bookName={imgAry[i+2].title} author={imgAry[i+2].author} pic={imgAry[i+2].image} />
+              </View>
             )
         }
-
-        // 返回数组
         return itemAry;
     },
 
-    // scrollView子视图
-    renderItem() {
-        var itemAry = [];
-
-        // 获取json中图片
-        var imgAry = imageData.data;
-
-        // 根据json数据实例化视图
-        for (var i = 0; i<imgAry.length; i++) {
-            // 取出单个对象
+    renderPagingIndicator() {
+        var itemAry = [], autoColor;
+        var  imgAry = this.state.bookList;
+        for (var i = 0; i<Math.ceil(imgAry.length / 3) ; i++) {
             var item = imgAry[i];
-            // 将子视图放进 itemAry
+            autoColor = (this.state.currentPage === i) ? {color:'gray'} : {color:'gainsboro'};
             itemAry.push(
-                // 实例化子视图
-                <View key={i} style={styles.topLiterature}>
-                  <View style={styles.itemStyle}>
-                    <View style={{marginTop: 10}}></View>
-                    <Image style={styles.picStyle} source={require('../images/exampples/Book_00.png')} />
-                    <View style={{paddingLeft: 6}}>
-                      <Text style={{color: "black"}}>至正枭雄传</Text>
-                      <Text style={{color: "gray"}}>丁忑</Text>
-                    </View>
-                  </View>
-                  <View style={styles.itemStyle}>
-                    <View style={{marginTop: 10}}></View>
-                    <Image style={styles.picStyle} source={require('../images/exampples/Book_01.png')} />
-                      <View style={{paddingLeft: 6}}>
-                        <Text style={{color: "black"}}>一天</Text>
-                        <Text style={{color: "gray"}}>芈易</Text>
-                      </View>
-                  </View>
-                  <View style={styles.itemStyle}>
-                    <View style={{marginTop: 10}}></View>
-                    <Image style={styles.picStyle} source={require('../images/exampples/Book_02.png')} />
-                      <View style={{paddingLeft: 6}}>
-                        <Text style={{color: "black"}}>均值回归</Text>
-                        <Text style={{color: "gray"}}>小菌子</Text>
-                      </View>
-                  </View>
-                  </View>
+                <Text key={i} style={[{fontSize:25}, autoColor]}>&bull;</Text>
             )
         }
-
-        // 返回数组
         return itemAry;
     },
 });
 
-// 样式
 var styles = StyleSheet.create({
     container: {
         backgroundColor:'white',
@@ -147,26 +123,6 @@ var styles = StyleSheet.create({
         // 上边距
         marginTop:3
     },
-
-    itemStyle: {
-      flex: 1,
-      marginLeft:1.5,
-      marginRight: 1.5,
-      height: 125,
-      width: 125
-    },
-
-    picStyle: {
-      // 尺寸
-      width: 100,
-      height:145,
-      // 图片等比例拉伸
-      resizeMode:'contain',
-      alignItems: "center",
-      marginTop: 10,
-      marginLeft: 9,
-    },
-
     pagingIndicatorStyle: {
         // 背景色(使背景色为全透明)
         backgroundColor:'rgba(255,255,255,0.0)',

@@ -13,6 +13,7 @@ var {
 
 import ScrollTest from "./ScrollBook"
 import CurrentMonth from "./CurrentMonth"
+import SearchInOriginal from "./SearchInOriginal"
 
 var Dimensions = require('Dimensions');
 var {width, height} = Dimensions.get('window');
@@ -31,10 +32,12 @@ export default class OriginalBar extends React.Component {
   _renderContent = (color: string, pageText: string) => {
     return (
       <View style={[styles.tabContent, {backgroundColor: color}]}>
-        <View style={[styles.topSearch, {backgroundColor: color}]}/>
+        <View style={[styles.topSearch, {backgroundColor: color}]}>
+          <SearchInOriginal/>
+        </View>
         <View style={styles.topLiterature}>
           <View style={{flex: 1, marginLeft: 10}}>
-              <Image source={require('../images/top-literature/topTheme.png')} style={{width: 200, height: 70}} />
+              <Image source={require('../images/top-literature/topTheme.png')} style={{width: null, height: 70}} />
           </View>
           <View style={{ width: 150, padding: 30}}>
               <Text style={[styles.tabContent], {fontSize: 20}}>入围作品</Text>
